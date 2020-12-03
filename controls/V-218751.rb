@@ -70,5 +70,24 @@ a finding.
   tag fix_id: 'F-20222r311152_fix'
   tag cci: ['V-100223', 'SV-109327', 'CCI-001188']
   tag nist: ['SC-23 (3)']
+  
+  get_mode = command('Get-WebConfigurationProperty -Filter system.web/sessionState -pspath "IIS:\Sites\*" -name * | select -expand mode').stdout.strip.split("\r\n")
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+
+  get_mode.zip(get_names).each do |mode, names|
+    describe "The IIS site: #{names} website session state" do
+      subject { mode }
+      it { should eq 'InProc' }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
