@@ -65,5 +65,26 @@ icon.
   tag fix_id: 'F-20241r311209_fix'
   tag cci: ['V-100261', 'SV-109365', 'CCI-002418']
   tag nist: ['SC-8']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_compressionEnabled = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.web/sessionState -name * | select -expand compressionEnabled').stdout.strip.split("\r\n")
+
+  get_compressionEnabled.zip(get_names).each do |compressionEnabled, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} website compressionEnabled enabled setting" do
+      subject { compressionEnabled }
+      it { should cmp 'False' }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
