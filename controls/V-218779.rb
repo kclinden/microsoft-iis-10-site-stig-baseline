@@ -63,5 +63,11 @@ on CGI or ASP script type.
   tag fix_id: 'F-20250r311236_fix'
   tag cci: ['SV-109383', 'V-100279', 'CCI-000381']
   tag nist: ['CM-7 a']
+
+  describe 'Manual review of website is needed' do
+    skip "Manually review to confirm that that interactive scripts on the
+    IIS 10.0 web server is located in unique and designated folders"
+  end
+
 end
 
