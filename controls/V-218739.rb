@@ -64,5 +64,34 @@ radio button.
   tag fix_id: 'F-20210r311116_fix'
   tag cci: ['SV-109303', 'V-100199', 'CCI-000139', 'CCI-001464']
   tag nist: ['AU-5 a', 'AU-14 (1)']
+
+  iis_modules = command('Get-WebConfiguration  system.webServer/globalModules/*').stdout.strip
+
+  describe 'IIS Module for ETW (Tracing) should be installed; Installed modules' do
+    subject { iis_modules }
+    it { should include 'UriCacheModule' }
+  end
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  site_names.each do |site_name|
+    iis_logging_configuration = json(command: %(Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter 'System.Applicationhost/Sites/site[@name="#{site_name}"]/logfile'  -Name * | ConvertTo-Json))
+
+    describe "IIS Logging configuration for Site :'#{site_name}'" do
+      subject { iis_logging_configuration }
+      its('logTargetW3C') { should include 'File' }
+      its('logTargetW3C') { should include 'ETW' }
+    end
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
