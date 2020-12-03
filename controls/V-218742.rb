@@ -76,5 +76,38 @@ and access control or flow control rules invoked.
   tag fix_id: 'F-20213r311125_fix'
   tag cci: ['SV-109309', 'V-100205', 'CCI-001487']
   tag nist: ['AU-3']
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  site_names.each do |site_name|
+    iis_logging_configuration = json(command: %(Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter 'System.Applicationhost/Sites/site[@name="#{site_name}"]/logfile'  -Name * | ConvertTo-Json))
+
+    describe "IIS Logging configuration for Site :'#{site_name}'" do
+      subject { iis_logging_configuration }
+      its('logFormat') { should cmp 'W3C' }
+      its('logExtFileFlags') { should include 'UserName' }
+      its('logExtFileFlags') { should include 'UserAgent' }
+      its('logExtFileFlags') { should include 'Referer' }
+    end
+  end
+
+  site_names.each do |site_name|
+    custom_field_configuration = command("Get-WebConfiguration -filter \"system.applicationHost/sites/site[@name=\'#{site_name}\']/logFile/customFields/*\"").stdout.strip
+    describe "IIS Custom Fields Logging configuration for Site :'#{site_name}'" do
+      subject { custom_field_configuration }
+      it { should match /sourceName\s+:\s+Authorization\s+sourceType\s+:\s+RequestHeader/ }
+      it { should match /sourceName\s+:\s+Content-Type\s+sourceType\s+:\s+ResponseHeader/ }
+    end
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
