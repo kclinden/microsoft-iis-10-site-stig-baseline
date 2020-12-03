@@ -44,5 +44,26 @@ disabled, it prevents attacks that rely on double-encoded requests."
   tag fix_id: 'F-20228r311170_fix'
   tag cci: ['V-100235', 'SV-109339', 'CCI-001094']
   tag nist: ['SC-5 (1)']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_allowdouble_escaping = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/security/requestFiltering -name * | select -expand allowDoubleEscaping').stdout.strip.split("\r\n")
+
+  get_allowdouble_escaping.zip(get_names).each do |allow_double_escaping, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites Allow double escaping" do
+      subject { allow_double_escaping }
+      it { should cmp 'False' }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
