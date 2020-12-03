@@ -69,7 +69,7 @@ Not Applicable.
     end
   end
 
-  if input'public_server')
+  if input('public_server')
     impact 0.0
     desc 'The server being reviewed is a public IIS 8.5 web
     server, hence this control is Not Applicable.'
