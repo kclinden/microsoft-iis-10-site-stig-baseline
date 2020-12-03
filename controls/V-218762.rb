@@ -49,5 +49,26 @@ amount of RAM on the system is limited.
   tag fix_id: 'F-20233r311185_fix'
   tag cci: ['V-100245', 'SV-109349', 'CCI-002361']
   tag nist: ['AC-12']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_idleTimeout_monitor = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.applicationHost/applicationPools -name * | select -expand applicationPoolDefaults | select -expand processModel | select -expand idleTimeout | select -expand TotalMinutes').stdout.strip.split("\r\n")
+
+  get_idleTimeout_monitor.zip(get_names).each do |idleTimeout_monitor, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites idle monitor time-out" do
+      subject { idleTimeout_monitor }
+      it { should cmp <= 20 }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
