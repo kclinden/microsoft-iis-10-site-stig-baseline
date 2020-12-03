@@ -1,8 +1,6 @@
 # microsoft-iis-10-site-stig-baseline  
 InSpec profile to validate the secure configuration of Microsoft Internet Information Services (IIS) 10.0 Server, against [DISA](https://public.cyber.mil)'s Microsoft IIS 10.0 Site Security Technical Implementation Guide (STIG) Version 2, Release 1.
 
-This Inspec Profile is in **draft** status.
-
 ## Running This Profile
 The profile can be ran be using the below command.
 ```
