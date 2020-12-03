@@ -66,5 +66,12 @@ Certificate\" drop-down and clicking \"OK\".
   tag fix_id: 'F-20238r311200_fix'
   tag cci: ['SV-109359', 'V-100255', 'CCI-002470']
   tag nist: ['SC-23 (5)']
+
+  describe 'Manually review the site certificate' do
+    skip 'Manually review to confirm that the certificate trust hierarchy leads
+    to the DoD PKI Root CA, DoD-approved external certificate authority (ECA),
+    or DoD-approved external partner'
+  end
+
 end
 
