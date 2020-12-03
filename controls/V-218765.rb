@@ -64,5 +64,41 @@ setting.
   tag fix_id: 'F-20236r311194_fix'
   tag cci: ['SV-109355', 'V-100251', 'CCI-001849']
   tag nist: ['AU-4']
+
+  log_directory_path = input('log_directory')
+
+  get_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  system_drive = command('$env:SystemDrive').stdout.strip
+
+  get_log_directory = command("Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter 'system.applicationHost/sites/*/logFile' -name * | select -expand directory").stdout.strip.split("\r\n")
+
+  get_log_directory.zip(get_names).each do |log_directory, name|
+    log_directory = log_directory.gsub(/%SystemDrive%/, system_drive.to_s)
+
+    describe "The IIS site: #{name} log directory" do
+      subject { log_directory }
+      it { should cmp log_directory_path.to_s }
+    end
+  end
+
+  get_log_period = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.ApplicationHost/log -name centralW3CLogFile | select -expand period').stdout.strip.split("\r\n")
+
+  get_log_period.zip(get_names).each do |log_period, name|
+    describe "The IIS site: #{name} websites log file rollover period" do
+      subject { log_period }
+      it { should cmp 'Daily' }
+    end
+  end
+
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
