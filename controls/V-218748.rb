@@ -63,5 +63,29 @@ port 443 for HTTPS. Other approved and documented ports may be used.
   tag fix_id: 'F-20219r311143_fix'
   tag cci: ['V-100217', 'SV-109321', 'CCI-000382']
   tag nist: ['CM-7 b']
+
+  site_name = input('site_name')
+
+  http_ip = input('http_ip')
+
+  http_hostname = input('http_hostname')
+
+  https_ip = input('https_ip')
+
+  https_hostname = input('https_hostname')
+
+  site_name.zip(http_ip, http_hostname).each do |site, httpip, httphostname|
+    describe iis_site(site.to_s) do
+      it { should exist }
+      it { should have_binding("http #{httpip}:80:#{httphostname}") }
+    end
+  end
+  site_name.zip(https_ip, https_hostname).each do |site, httpsip, httsphostname|
+    describe iis_site(site.to_s) do
+      it { should exist }
+      it { should have_binding("https #{httpsip}:80:#{httsphostname}") }
+    end
+  end
+
 end
 
