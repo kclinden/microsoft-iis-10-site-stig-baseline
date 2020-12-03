@@ -46,5 +46,26 @@ requests and custom error pages for remote requests\".
   tag fix_id: 'F-20231r311179_fix'
   tag cci: ['V-100241', 'SV-109345', 'CCI-001312']
   tag nist: ['SI-11 a']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_errorMode = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/httpErrors -Name errorMode').stdout.strip.split("\r\n")
+
+  get_errorMode.zip(get_names).each do |errorMode, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites error mode" do
+      subject { errorMode }
+      it { should cmp 'DetailedLocalOnly' }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
