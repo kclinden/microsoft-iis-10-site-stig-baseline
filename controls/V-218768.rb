@@ -79,5 +79,28 @@ editor, locate \"system.webServer/security/access\".
   tag fix_id: 'F-20239r311203_fix'
   tag cci: ['V-100257', 'SV-109361', 'CCI-002476']
   tag nist: ['SC-28 (1)']
+
+  get_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  get_names.each do |site_name|
+    iis_configuration = json(command: "Get-WebConfigurationProperty -Filter system.webServer/security/access 'IIS:\\Sites\\#{site_name}'  -Name * | ConvertTo-Json")
+
+    describe "IIS sessionState for site :'#{site_name}'" do
+      subject { iis_configuration }
+      its('sslFlags') { should include 'Ssl' }
+      its('sslFlags') { should include 'SslRequireCert' }
+      its('sslFlags') { should include 'Ssl128' }
+    end
+  end
+
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
