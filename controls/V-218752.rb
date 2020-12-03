@@ -46,5 +46,29 @@ not otherwise hosting any content, this requirement is Not Applicable.
   tag fix_id: 'F-20223r311155_fix'
   tag cci: ['SV-109329', 'V-100225', 'CCI-001084']
   tag nist: ['SC-3']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+
+  get_names.each do |names|
+    n = names.strip
+    system_drive = command('$env:SystemDrive').stdout.strip
+
+    get_physical_path = command("(Get-Website -Name '#{n}').PhysicalPath").stdout.strip.gsub(/%SystemDrive%/, system_drive.to_s)
+
+    path = get_physical_path[0..1]
+    describe "IIS site #{n} physical path #{path}" do
+      subject { path.gsub(/%SystemDrive%/, system_drive.to_s) }
+      it { should_not cmp system_drive.to_s }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
