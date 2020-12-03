@@ -57,5 +57,32 @@ Not Applicable.
   tag fix_id: 'F-20208r505263_fix'
   tag cci: ['SV-109299', 'V-100195', 'CCI-000068']
   tag nist: ['AC-17 (2)']
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  site_names.each do |site_name|
+    iis_configuration = json(command: "Get-WebConfigurationProperty -Filter system.webServer/security/access 'IIS:\\Sites\\#{site_name}'  -Name * | ConvertTo-Json")
+
+    describe "IIS sessionState for site :'#{site_name}'" do
+      subject { iis_configuration }
+      its('sslFlags') { should include 'Ssl' }
+    end
+  end
+
+  if input'public_server')
+    impact 0.0
+    desc 'The server being reviewed is a public IIS 8.5 web
+    server, hence this control is Not Applicable.'
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
