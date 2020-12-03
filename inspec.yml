@@ -36,17 +36,17 @@ inputs:
   - name: http_ip
     description: 'IP address used for http'
     type: array
-    value: ['192.168.1.100', '0.0.0.0']
+    value: ['10.0.2.15', '0.0.0.0']
 
   - name: http_hostname
     description: 'IP address used for https'
     type: array
-    value: ['127.0.0.1']
+    value: ['local', 'l']
     
   - name: https_ip
     description: 'IP address used for https'
     type: array
-    value: ['192.168.1.100', '0.0.0.0']
+    value: ['10.0.2.15', '0.0.0.0']
 
   - name: https_hostname
     description: 'Hostname used for https'
