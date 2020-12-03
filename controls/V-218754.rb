@@ -45,5 +45,26 @@ finding.
   tag fix_id: 'F-20225r311161_fix'
   tag cci: ['V-100229', 'SV-109333', 'CCI-001094']
   tag nist: ['SC-5 (1)']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_maxAllowedContentLength = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/security/requestFiltering -name * | select -expand requestLimits | select -expand maxAllowedContentLength').stdout.strip.split("\r\n")
+
+  get_maxAllowedContentLength.zip(get_names).each do |maxAllowedContentLength, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites max allowed content length" do
+      subject { maxAllowedContentLength }
+      it { should cmp <= 30_000_000 }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
