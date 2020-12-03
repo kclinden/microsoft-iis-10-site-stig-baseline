@@ -4,7 +4,7 @@ InSpec profile to validate the secure configuration of Microsoft Internet Inform
 ## Running This Profile
 The profile can be ran be using the below command.
 ```
-inspec exec https://github.com/kclinden/microsoft-iis-10-site-stig-baseline -t winrm://$server --user $user --password $pass --reporter cli
+inspec exec https://github.com/kclinden/microsoft-iis-10-site-stig-baseline.git -t winrm://$server --user $user --password $pass --reporter cli
 ```
 
 ## Info
