@@ -6,3 +6,54 @@ copyright_email: n/a
 license: Apache-2.0
 summary: "This Security Technical Implementation Guide is published as a tool to improve the security of Department of Defense (DoD) information systems. The requirements are derived from the National Institute of Standards and Technology (NIST) 800-53 and related documents. Comments or proposed revisions to this document should be sent via email to the following address: disa.stig_spt@mail.mil."
 version: 0.1.0
+
+inputs:
+  - name: public_server
+    description: 'Specify if the server being reviewed is a public IIS web server'
+    type: boolean
+    value: false
+
+  - name: private_server
+    description: 'Specify if the server being reviewed is a private IIS web server'
+    type: boolean
+    value: false
+
+  - name: non_production_server
+    description: 'Specify if the server being reviewed is a non-production website'
+    type: boolean
+    value: false
+
+  - name: black_listed_extensions
+    description: 'List of Request Filtering black listed extensions'
+    type: array
+    value: []
+
+  - name: site_name
+    description: 'Name of IIS site'
+    type: array
+    value: ['tt', 'value']
+
+  - name: http_ip
+    description: 'IP address used for http'
+    type: array
+    value: ['10.0.2.15', '0.0.0.0']
+
+  - name: http_hostname
+    description: 'IP address used for https'
+    type: array
+    value: ['local', 'l']
+    
+  - name: https_ip
+    description: 'IP address used for https'
+    type: array
+    value: ['10.0.2.15', '0.0.0.0']
+
+  - name: https_hostname
+    description: 'Hostname used for https'
+    type: array
+    value: ['localhttps', 'localhttps2']
+
+  - name: log_directory
+    description: 'Path of IIS log directory'
+    type: string
+    value: 'C:\inetpub\logs\LogFiles'
