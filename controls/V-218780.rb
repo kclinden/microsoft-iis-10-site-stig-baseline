@@ -86,5 +86,11 @@ website. Common file extensions include, but are not limited to: .cgi, .pl,
   tag fix_id: 'F-20251r505269_fix'
   tag cci: ['V-100281', 'SV-109385', 'CCI-000381']
   tag nist: ['CM-7 a']
+
+  describe 'Manual review of website is needed' do
+    skip "Manually review to confirm that Interactive scripts on the IIS 10.0 web
+    server has restrictive access controls"
+  end
+
 end
 
