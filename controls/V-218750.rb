@@ -71,5 +71,99 @@ accounts and all privileged groups."
   tag fix_id: 'F-20221r311149_fix'
   tag cci: ['SV-109325', 'V-100221', 'CCI-001082']
   tag nist: ['SC-2']
+
+
+  get_names = command("Get-Website | select name | findstr /r /v '^$' | findstr /v 'name ---'").stdout.strip.split("\r\n")
+
+  get_names.each do |names|
+    n = names.strip
+
+    is_anonymous_access_enabled = command("Get-WebConfigurationProperty -pspath \"IIS:\Sites\\#{n}\" -filter system.webServer/security/authentication/anonymousAuthentication -name * | select -expand Enabled").stdout.strip.split("\n")
+
+    is_anonymous_access_enabled.each do |a|
+      if a == 'True'
+        get_anonymous_authentication_account = command("Get-WebConfigurationProperty -pspath \"IIS:\Sites\\#{n}\" -Filter system.webServer/security/authentication/anonymousAuthentication -name * | select -expand userName").stdout.strip
+
+        describe "Users allowed anonymous access in the Administrator group for IIS site #{n}" do
+          subject { command("net localgroup Administrators | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Backup Operators group for IIS site #{n}" do
+          subject { command("net localgroup 'Backup Operators' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Certificate Service DCOM Access group for IIS site #{n}" do
+          subject { command("net localgroup 'Certificate Service DCOM Access' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Distributed COM Users group for IIS site #{n}" do
+          subject { command("net localgroup 'Distributed COM Users' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Event Log Readers group for IIS site #{n}" do
+          subject { command("net localgroup 'Event Log Readers' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Network Configuration Operators group for IIS site #{n}" do
+          subject { command("net localgroup 'Network Configuration Operators' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Performance Log Users group for IIS site #{n}" do
+          subject { command("net localgroup 'Performance Log Users' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Performance Monitor Users group for IIS site #{n}" do
+          subject { command("net localgroup 'Performance Monitor Users' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Power Users group for IIS site #{n}" do
+          subject { command("net localgroup 'Power Users' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Print Operators group for IIS site #{n}" do
+          subject { command("net localgroup 'Print Operators' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Remote Desktop Users group for IIS site #{n}" do
+          subject { command("net localgroup 'Remote Desktop Users' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Replicator group for IIS site #{n}" do
+          subject { command("net localgroup 'Replicator' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+
+        describe "Users allowed anonymous access in the Users group for IIS site #{n}" do
+          subject { command("net localgroup 'Users' | Findstr #{get_anonymous_authentication_account}").stdout }
+          it { should eq '' }
+        end
+      else
+        describe "IIS site #{n} anonymous access setting" do
+          subject { a }
+          it { should cmp 'False' }
+        end
+      end
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
