@@ -75,5 +75,37 @@ control rules invoked.
   tag fix_id: 'F-20212r311122_fix'
   tag cci: ['SV-109307', 'V-100203', 'CCI-000134']
   tag nist: ['AU-3']
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  site_names.each do |site_name|
+    iis_logging_configuration = json(command: %(Get-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter 'System.Applicationhost/Sites/site[@name="#{site_name}"]/logfile'  -Name * | ConvertTo-Json))
+
+    describe "IIS Logging configuration for Site :'#{site_name}'" do
+      subject { iis_logging_configuration }
+      its('logFormat') { should cmp 'W3C' }
+    end
+  end
+
+  custom_field_configuration = []
+  site_names.each do |site_name|
+    custom_field_configuration = command("Get-WebConfiguration -filter \"system.applicationHost/sites/site[@name=\'#{site_name}\']/logFile/customFields/*\"").stdout.strip
+    describe "IIS Custom Fields Logging configuration for Site :'#{site_name}'" do
+      subject { custom_field_configuration }
+      it { should match /sourceName\s+:\s+Connection\s+sourceType\s+:\s+RequestHeader/ }
+      it { should match /sourceName\s+:\s+Warning\s+sourceType\s+:\s+RequestHeader/ }
+      it { should match /sourceName\s+:\s+HTTP_CONNECTION\s+sourceType\s+:\s+ServerVariable/ }
+    end
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
