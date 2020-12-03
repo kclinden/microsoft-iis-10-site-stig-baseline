@@ -54,5 +54,26 @@ icon.
   tag fix_id: 'F-20240r311206_fix'
   tag cci: ['V-100259', 'SV-109363', 'CCI-002418']
   tag nist: ['SC-8']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_keepSessionIdSecure = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/asp -name * | select -expand session | select -expand keepSessionIdSecure').stdout.strip.split("\r\n")
+
+  get_keepSessionIdSecure.zip(get_names).each do |keepSessionIdSecure, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} website keepSessionIdSecure enabled setting" do
+      subject { keepSessionIdSecure }
+      it { should cmp 'True' }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
