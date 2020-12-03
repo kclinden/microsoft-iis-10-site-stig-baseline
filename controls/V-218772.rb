@@ -55,5 +55,25 @@ Limit\" to greater than \"0\".
   tag fix_id: 'F-20243r311215_fix'
   tag cci: ['SV-109369', 'V-100265', 'CCI-000366']
   tag nist: ['CM-6 b']
+
+  application_pool_names = json(command: 'ConvertTo-Json @(Get-ChildItem -Path IIS:\AppPools | select -expand name)').params
+
+  application_pool_names.each do |application_pool|
+    iis_configuration = json(command: "Get-ItemProperty 'IIS:\\AppPools\\#{application_pool}' -name * | select -expand recycling | select -expand periodicRestart | ConvertTo-Json")
+
+    describe "The maximum number of requests an application pool can process for IIS Application Pool :'#{application_pool}'" do
+      subject { iis_configuration }
+      its('requests') { should cmp > 3 }
+    end
+  end
+  if application_pool_names.empty?
+    impact 0.0
+    desc 'There are no application pool configured hence the control is Not-Applicable'
+
+    describe 'No application pool where found to be reviewed' do
+      skip 'No application pool where found to be reviewed'
+    end
+  end
+
 end
 
