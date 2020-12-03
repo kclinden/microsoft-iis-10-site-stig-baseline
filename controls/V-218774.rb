@@ -56,5 +56,25 @@ Memory Limit\" to a value other than \"0\".
   tag fix_id: 'F-20245r311221_fix'
   tag cci: ['SV-109373', 'V-100269', 'CCI-000366']
   tag nist: ['CM-6 b']
+
+  application_pool_names = json(command: 'ConvertTo-Json @(Get-ChildItem -Path IIS:\AppPools | select -expand name)').params
+
+  application_pool_names.each do |application_pool|
+    iis_configuration = json(command: "Get-ItemProperty 'IIS:\\AppPools\\#{application_pool}' -name * | select -expand recycling | select -expand periodicRestart | ConvertTo-Json")
+
+    describe "The amount of private memory for IIS Application Pool :'#{application_pool}'" do
+      subject { iis_configuration }
+      its('privateMemory') { should_not cmp 0 }
+    end
+  end
+  if application_pool_names.empty?
+    impact 0.0
+    desc 'There are no application pool configured hence the control is Not-Applicable'
+
+    describe 'No application pool where found to be reviewed' do
+      skip 'No application pool where found to be reviewed'
+    end
+  end
+
 end
 
