@@ -57,5 +57,32 @@ is not a finding.
   tag fix_id: 'F-20220r311146_fix'
   tag cci: ['SV-109323', 'V-100219', 'CCI-001188', 'CCI-000197', 'CCI-002470']
   tag nist: ['SC-23 (3)', 'IA-5 (1) (c)', 'SC-23 (5)']
+
+  get_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  get_names.each do |site_name|
+    iis_configuration = json(command: "Get-WebConfigurationProperty -Filter system.webServer/security/access 'IIS:\\Sites\\#{site_name}'  -Name * | ConvertTo-Json")
+
+    describe "IIS sessionState for site :'#{site_name}'" do
+      subject { iis_configuration }
+      its('sslFlags') { should include 'SslRequireCert' }
+    end
+  end
+
+  if input('public_server')
+    impact 0.0
+    desc 'The server being reviewed is a public IIS 10.0 web
+    server, hence this control is Not Applicable.'
+  end
+
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
