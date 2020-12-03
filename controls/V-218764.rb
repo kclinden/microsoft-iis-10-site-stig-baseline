@@ -76,5 +76,11 @@ the IIS 10.0 Manager.
   tag fix_id: 'F-20235r311191_fix'
   tag cci: ['V-100249', 'SV-109353', 'CCI-002322']
   tag nist: ['AC-17 (9)']
+
+  describe "The IIS 10.0 website must provide the capability to immediately
+  disconnect or disable remote access to the hosted applications" do
+    skip 'The control should be manually reviewed.'
+  end
+
 end
 
