@@ -41,5 +41,32 @@ disclosing sensitive content is increased."
   tag fix_id: 'F-20230r311176_fix'
   tag cci: ['SV-109343', 'V-100239', 'CCI-001310']
   tag nist: ['SI-10']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_directory_browsing = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/directoryBrowse -name * | select -expand enabled').stdout.strip.split("\r\n")
+
+  get_directory_browsing.zip(get_names).each do |directory_browsing, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites enable directory browsing" do
+      subject { directory_browsing }
+      it { should cmp 'False' }
+    end
+  end
+
+  if command('Get-WebConfiguration  system.webServer/globalModules/*').stdout.strip.include?('DirectoryListingModule')
+    impact 0.0
+    desc 'Directory Browsing is not installed, hence this control is Not Applicable.'
+  end
+
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
