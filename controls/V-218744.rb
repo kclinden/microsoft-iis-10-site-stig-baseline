@@ -50,5 +50,21 @@ finding.
   tag fix_id: 'F-20215r311131_fix'
   tag cci: ['V-100209', 'SV-109313', 'CCI-000381']
   tag nist: ['CM-7 a']
+
+  describe 'Manually review the Handler Mappings' do
+    skip 'Manually review site Handler Mappings configuration; If any script file
+    extensions from the black list are enabled, this is a finding."'
+  end
+
+  get_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
