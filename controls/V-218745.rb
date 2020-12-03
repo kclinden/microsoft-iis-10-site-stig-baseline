@@ -57,5 +57,27 @@ Extension.
   tag fix_id: 'F-20216r311134_fix'
   tag cci: ['V-100211', 'SV-109315', 'CCI-000381']
   tag nist: ['CM-7 a']
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+  black_listed_extensions = input('black_listed_extensions')
+
+  site_names.each do |site_name|
+    extensions = command("Get-WebConfigurationProperty -Filter /system.webserver/security/requestFiltering/fileExtensions 'IIS:\\Sites\\#{site_name}'  -Name Collection | where {$_.allowed -eq $true}| select -expand fileExtension").stdout.split
+
+    describe "Allowed Request Filtering extensions should not be in black listed extensions; #{extensions}" do
+      subject { extensions }
+      it { should_not be_in black_listed_extensions }
+    end
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
