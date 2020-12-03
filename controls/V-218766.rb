@@ -57,5 +57,29 @@ then this is a finding.
   tag fix_id: 'F-20237r311197_fix'
   tag cci: ['V-100253', 'SV-109357', 'CCI-001762']
   tag nist: ['CM-7 (1) (b)']
+
+  site_name = input('site_name')
+
+  http_ip = input('http_ip')
+
+  http_hostname = input('http_hostname')
+
+  https_ip = input('https_ip')
+
+  https_hostname = input('https_hostname')
+
+  site_name.zip(http_ip, http_hostname).each do |site, httpip, httphostname|
+    describe iis_site(site.to_s) do
+      it { should exist }
+      it { should have_binding("http #{httpip}:80:#{httphostname}") }
+    end
+  end
+  site_name.zip(https_ip, https_hostname).each do |site, httpsip, httsphostname|
+    describe iis_site(site.to_s) do
+      it { should exist }
+      it { should have_binding("https #{httpsip}:443:#{httsphostname}") }
+    end
+  end
+
 end
 
