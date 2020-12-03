@@ -45,5 +45,34 @@ is set to \"False\".
   tag fix_id: 'F-20232r311182_fix'
   tag cci: ['SV-109347', 'V-100243', 'CCI-001312']
   tag nist: ['SI-11 a']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_debug_enabled = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.web/compilation -name * | select -expand debug').stdout.strip.split("\r\n")
+
+  get_debug_enabled.zip(get_names).each do |debug_enabled, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites debugging enabled" do
+      subject { debug_enabled }
+      it { should cmp 'False' }
+    end
+  end
+
+  iis_modules = command('Get-WebConfiguration  system.webServer/globalModules/*').stdout.strip
+
+  unless iis_modules.include?('.NET')
+    impact 0.0
+    desc '.NET feature not installed hence the control not applicable'
+  end
+
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
