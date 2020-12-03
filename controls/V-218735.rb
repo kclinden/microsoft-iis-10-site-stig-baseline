@@ -80,5 +80,26 @@ selected.
   tag fix_id: 'F-20206r311104_fix'
   tag cci: ['SV-109295', 'V-100191', 'CCI-000054']
   tag nist: ['AC-10']
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  site_names.each do |site_name|
+    iis_configuration = json(command: "Get-WebConfigurationProperty -Filter system.web/sessionState 'IIS:\\Sites\\#{site_name}'  -Name * | ConvertTo-Json")
+
+    describe "IIS sessionState setting for Site :'#{site_name}'" do
+      subject { iis_configuration }
+      its('mode') { should cmp 'InProc' }
+    end
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
