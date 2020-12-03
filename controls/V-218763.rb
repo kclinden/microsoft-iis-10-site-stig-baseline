@@ -61,5 +61,26 @@ medium-value applications, and 20 minutes for low-value applications.
   tag fix_id: 'F-20234r311188_fix'
   tag cci: ['V-100247', 'SV-109351', 'CCI-002361']
   tag nist: ['AC-12']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_connectionTimeout = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.web/sessionState -name * | select -expand timeout | select -expand TotalMinutes').stdout.strip.split("\r\n")
+
+  get_connectionTimeout.zip(get_names).each do |connectionTimeout, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites connection timeout" do
+      subject { connectionTimeout }
+      it { should cmp <= 20 }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
