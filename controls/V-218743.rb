@@ -75,5 +75,49 @@ shell program extensions, to include at a minimum, the following extensions:
   tag fix_id: 'F-20214r311128_fix'
   tag cci: ['V-100207', 'SV-109311', 'CCI-000381']
   tag nist: ['CM-7 a']
+
+  get_names = command("Get-Website | select name | findstr /r /v '^$' | findstr /v 'name ---'").stdout.strip.split("\r\n")
+
+  get_names.each do |names|
+    n = names.strip
+    exe_files = command("Get-WebConfiguration -pspath \"IIS:\Sites\\#{n}\" -filter \"system.webServer/staticContent/mimeMap\" | ? {$_.fileextension -eq '.exe'}").stdout
+    dll_files = command("Get-WebConfiguration -pspath \"IIS:\Sites\\#{n}\" -filter \"system.webServer/staticContent/mimeMap\" | ? {$_.fileextension -eq '.dll'}").stdout
+
+    com_files = command("Get-WebConfiguration -pspath \"IIS:\Sites\\#{n}\" -filter \"system.webServer/staticContent/mimeMap\" | ? {$_.fileextension -eq '.com'}").stdout
+
+    bat_files = command("Get-WebConfiguration -pspath \"IIS:\Sites\\#{n}\" -filter \"system.webServer/staticContent/mimeMap\" | ? {$_.fileextension -eq '.bat'}").stdout
+
+    csh_files = command("Get-WebConfiguration -pspath \"IIS:\Sites\\#{n}\" -filter \"system.webServer/staticContent/mimeMap\" | ? {$_.fileextension -eq '.csh'}").stdout
+
+    describe "The IIS Site: #{n} MIME .exe files found" do
+      subject { exe_files }
+      it { should be_empty }
+    end
+    describe "The IIS Site: #{n}  MIME .dll files found" do
+      subject { dll_files }
+      it { should be_empty }
+    end
+    describe "The IIS Site: #{n} MIME .com files found" do
+      subject { com_files }
+      it { should be_empty }
+    end
+    describe "The IIS Site: #{n} .bat files found" do
+      subject { bat_files }
+      it { should be_empty }
+    end
+    describe "The IIS Site: #{n} MIME .csh files found" do
+      subject { csh_files }
+      it { should be_empty }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
