@@ -44,5 +44,25 @@ is a finding.
   tag fix_id: 'F-20226r311164_fix'
   tag cci: ['SV-109335', 'V-100231', 'CCI-001094']
   tag nist: ['SC-5 (1)']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_maxQueryString = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/security/requestFiltering -name * | select -expand requestLimits | select -expand maxQueryString').stdout.strip.split("\r\n")
+
+  get_maxQueryString.zip(get_names).each do |maxQueryString, names|
+    n = names.strip
+    describe "The IIS site: #{n} websites Maximum Query String limit" do
+      subject { maxQueryString }
+      it { should cmp <= 2048 }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
