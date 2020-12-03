@@ -57,5 +57,25 @@ the \"Actions\" pane.
   tag fix_id: 'F-20249r311233_fix'
   tag cci: ['SV-109381', 'V-100277', 'CCI-000366']
   tag nist: ['CM-6 b']
+
+  application_pool_names = json(command: 'ConvertTo-Json @(Get-ChildItem -Path IIS:\AppPools | select -expand name)').params
+
+  application_pool_names.each do |application_pool|
+    iis_configuration = json(command: "Get-ItemProperty 'IIS:\\AppPools\\#{application_pool}' -name * | select -expand failure | select -expand rapidFailProtectionInterval| ConvertTo-Json")
+
+    describe "The rapid fail protection total minutes for IIS Application Pool :'#{application_pool}'" do
+      subject { iis_configuration }
+      its('TotalMinutes') { should cmp <= 5 }
+    end
+  end
+  if application_pool_names.empty?
+    impact 0.0
+    desc 'There are no application pool configured hence the control is Not-Applicable'
+
+    describe 'No application pool where found to be reviewed' do
+      skip 'No application pool where found to be reviewed'
+    end
+  end
+
 end
 
