@@ -50,5 +50,26 @@ not otherwise hosting any content, this requirement is Not Applicable.
   tag fix_id: 'F-20229r311173_fix'
   tag cci: ['SV-109341', 'V-100237', 'CCI-001094']
   tag nist: ['SC-5 (1)']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_allow_unlisted = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/security/requestFiltering -name * | select -expand fileExtensions | select -expand allowUnlisted').stdout.strip.split("\r\n")
+
+  get_allow_unlisted.zip(get_names).each do |allow_unlisted, names|
+    n = names.strip
+
+    describe "The IIS site: #{n} websites Allow unlisted file extension" do
+      subject { allow_unlisted }
+      it { should cmp 'False' }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
