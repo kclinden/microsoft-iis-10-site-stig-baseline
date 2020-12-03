@@ -39,5 +39,17 @@ underlying operating system.
   tag fix_id: 'F-20252r311242_fix'
   tag cci: ['SV-109387', 'V-100283', 'CCI-000381']
   tag nist: ['CM-7 a']
+
+  iis_modules = command('Get-WebConfiguration  system.webServer/globalModules/*').stdout.strip
+
+  unless iis_modules.include?('CgiMowdule')
+    impact 0.0
+    desc 'CgiMowdule not installed hence the control not applicable'
+  end
+
+  describe 'Manual review of website is needed' do
+    skip 'Manual review that Backup interactive scripts on the IIS 10.0 server is removed'
+  end
+
 end
 
