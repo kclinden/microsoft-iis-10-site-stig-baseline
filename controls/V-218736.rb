@@ -73,5 +73,25 @@ drop-down list.
   tag fix_id: 'F-20207r311107_fix'
   tag cci: ['SV-109297', 'V-100193', 'CCI-000054']
   tag nist: ['AC-10']
+
+  site_names = json(command: 'ConvertTo-Json @(Get-Website | select -expand name)').params
+
+  site_names.each do |site_name|
+    iis_configuration = json(command: "Get-WebConfigurationProperty -Filter system.web/sessionState 'IIS:\\Sites\\#{site_name}'  -Name * | ConvertTo-Json")
+
+    describe "IIS sessionState for site :'#{site_name}'" do
+      subject { iis_configuration }
+      its('cookieless') { should cmp 'UseCookies' }
+    end
+  end
+
+  if site_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
 end
 
