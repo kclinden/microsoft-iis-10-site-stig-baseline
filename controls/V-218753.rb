@@ -42,5 +42,25 @@ accept in a URL."
   tag fix_id: 'F-20224r311158_fix'
   tag cci: ['SV-109331', 'V-100227', 'CCI-001094']
   tag nist: ['SC-5 (1)']
+
+  get_names = command("Get-Website | select name | findstr /v 'name ---'").stdout.strip.split("\r\n")
+  get_maxurl = command('Get-WebConfigurationProperty -pspath "IIS:\Sites\*" -Filter system.webServer/security/requestFiltering -name * | select -expand requestLimits | select -expand maxUrl').stdout.strip.split("\r\n")
+
+  get_maxurl.zip(get_names).each do |maxurl, names|
+    n = names.strip
+    describe "IIS site: #{n} websites maxUrl" do
+      subject { maxurl }
+      it { should cmp <= 4096 }
+    end
+  end
+  if get_names.empty?
+    impact 0.0
+    desc 'There are no IIS sites configured hence the control is Not-Applicable'
+
+    describe 'No sites where found to be reviewed' do
+      skip 'No sites where found to be reviewed'
+    end
+  end
+
 end
 
