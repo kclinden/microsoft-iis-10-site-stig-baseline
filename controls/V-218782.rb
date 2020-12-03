@@ -73,5 +73,11 @@ banner page when authentication is required for user access."
   tag fix_id: 'F-20253r311245_fix'
   tag cci: ['V-100285', 'SV-109389', 'CCI-000366']
   tag nist: ['CM-6 b']
+
+  describe 'Manual review of website is needed' do
+    skip "Manual review that required DoD banner page must is displayed to authenticated users
+    accessing a DoD private website"
+  end
+
 end
 
