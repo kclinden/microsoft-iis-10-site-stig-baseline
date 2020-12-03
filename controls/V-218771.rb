@@ -40,5 +40,11 @@ a finding.
   tag fix_id: 'F-20242r311212_fix'
   tag cci: ['SV-109367', 'V-100263', 'CCI-000366']
   tag nist: ['CM-6 b']
+
+  describe 'Manual review of website is needed' do
+    skip 'Manually review to confirm that the IIS 10.0 websites have a unique
+    application pool'
+  end
+
 end
 
