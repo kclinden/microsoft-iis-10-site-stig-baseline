@@ -9,11 +9,11 @@ inspec exec https://github.com/kclinden/microsoft-iis-10-site-stig-baseline.git 
 
 ## STIG Coverage
 
-Total Stig Rule Coverage: 52 of 60 rules are automated; 87%
+Total Stig Rule Coverage: 52 of 60 rules are automated; 87%  
 
-High (CAT I): 13 of 13 rules are automated
-Medium (CAT II): 37 of 46 rules are automated
-Low (CAT III): 1 of 1 rules are automated
+High (CAT I): 13 of 13 rules are automated  
+Medium (CAT II): 37 of 46 rules are automated  
+Low (CAT III): 1 of 1 rules are automated  
 
 ### Document / Manual Rules (Not Automated)
 | StigRuleId |	Severity |
